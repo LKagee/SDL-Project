@@ -33,7 +33,9 @@ int main()
 			case SDL_KEYDOWN: {
 					switch(event.key.keysym.sym) {
 						case SDLK_ESCAPE: {
-									  sdl_cleanup(&game, EXIT_SUCCESS); break;}
+							sdl_cleanup(&game, EXIT_SUCCESS); break;}
+            case SDLK_TAB: {
+              sdl_cleanup(&game, EXIT_SUCCESS); break;}
 	}
     }
 }		
