@@ -36,10 +36,12 @@ int main()
 							sdl_cleanup(&game, EXIT_SUCCESS); break;}
             case SDLK_TAB: {
               sdl_cleanup(&game, EXIT_SUCCESS); break;}
+            case SDLK_SPACE: {
+              SDL_SetRenderDrawColor(game.renderer,200, 200, 200, 200); break;}
 	}
     }
-}		
-
+}	
+  
 	SDL_RenderClear(game.renderer);
 	SDL_RenderPresent(game.renderer);
 	SDL_Delay(16);
@@ -71,6 +73,8 @@ game->renderer = SDL_CreateRenderer(game->window, -1, 0);
 		fprintf(stderr, "Error creating renderer: %s", SDL_GetError() );
 	return true;
 }
+
+SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
 
 return false;
 }
