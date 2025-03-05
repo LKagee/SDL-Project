@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <time.h>
 #define WINDOW_NAME "Window"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -37,7 +39,7 @@ int main()
             case SDLK_TAB: {
               sdl_cleanup(&game, EXIT_SUCCESS); break;}
             case SDLK_SPACE: {
-              SDL_SetRenderDrawColor(game.renderer,200, 200, 200, 200); break;}
+              SDL_SetRenderDrawColor(game.renderer, srand() % 256, srand() % 256, srand() % 256, 256; break;}
 	}
     }
 }	
@@ -75,6 +77,8 @@ game->renderer = SDL_CreateRenderer(game->window, -1, 0);
 }
 
 SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
+
+srand((unsigned)time(NULL));
 
 return false;
 }
