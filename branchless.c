@@ -25,6 +25,7 @@ int main()
 		sdl_cleanup(&game, EXIT_FAILURE);
 		return 1;
 	}
+  SDL_SetWindowBrightness(game.window, 1.0);
 
 	while(true) {
 		SDL_Event event;
@@ -39,17 +40,27 @@ int main()
             case SDLK_TAB: {
               sdl_cleanup(&game, EXIT_SUCCESS); break;}
             case SDLK_SPACE: {
-              SDL_SetRenderDrawColor(game.renderer, srand() % 256, srand() % 256, srand() % 256, 256; break;}
-	}
-    }
-}	
+              SDL_SetRenderDrawColor(game.renderer, rand() % 256, rand() % 256, rand() % 256, 255); break;}
+            case SDLK_w: {
+             SDL_MaximizeWindow(game.window); break;}
+
+            case SDLK_s: {
+             SDL_MinimizeWindow(game.window); break;}
+            }
+            }
+}
   
 	SDL_RenderClear(game.renderer);
 	SDL_RenderPresent(game.renderer);
 	SDL_Delay(16);
-	}
-   }
+    }
+  } 
 }
+
+
+
+
+
 
 void sdl_cleanup(struct Game *game, int exit_status) {
 	SDL_DestroyWindow(game->window);
@@ -64,7 +75,7 @@ bool sdl_initialize(struct Game *game) {
 	return true;
 }
 
-game->window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+game->window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
 	if(!game->window) {
 		fprintf(stderr, "Error creating window: %s\n", SDL_GetError() );
 	return true;
@@ -80,6 +91,8 @@ SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
 
 srand((unsigned)time(NULL));
 
+SDL_SetWindowMinimumSize(game->window, 200, 200);
+
 return false;
 }
-	
+
