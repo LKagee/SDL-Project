@@ -2,16 +2,23 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <time.h>
 #define WINDOW_NAME "Window"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define TEXT_SIZE 80
 struct Game {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
+  TTF_Font *ttf_font;
+  SDL_Color *text_color;
+  SDL_Rect *sdl_rectum;
+  SDL_Texture *text_image;
 };
 
 bool sdl_initialize(struct Game *game);
+bool sdl_loadmedia(struct Game *game);
 void sdl_cleanup(struct Game *game, int exit_status);
 
 int main()
@@ -19,6 +26,11 @@ int main()
 	struct Game game = {
 		.window = NULL,
 		.renderer = NULL,
+    .surface = NULL,
+    .ttf_font = NULL,
+    .text_color = {255, 255, 255, 255},
+    .sdl_rectum = {0, 0, 0, 0},
+    .text_image = NULL,
 	};
 	
 	if(sdl_initialize(&game)) {
@@ -87,12 +99,34 @@ game->renderer = SDL_CreateRenderer(game->window, -1, 0);
 	return true;
 }
 
+if(TTF_Init()) {
+    fprintf(stderr, "Error sucking cock: %s", TTF_GetError() );
+    return true;
+  }
+
 SDL_SetRenderDrawColor(game->renderer, 255, 255, 255, 255);
 
 srand((unsigned)time(NULL));
 
-SDL_SetWindowMinimumSize(game->window, 200, 200);
+SDL_SetWindowMinimumSize(game->window, 800, 600);
 
 return false;
 }
 
+bool sdl_loadmedia(struct Game *game) {
+  game->ttf_font = TTF_OpenFont(tbd, TEXT_SIZE);
+    if(!game->ttf_font) {
+      fprintf(stderr, "Error creating font: %s", TTF_GetError() );
+      return true;
+  }
+
+  SDL_Surface *surface = 
+    TTF_RenderText_Blended(game->ttf_font, "SDL", game->text_color);
+      if(!surface) {
+        fprintf(stderr, "Error rendering text: %s", TTF_GetError() );
+        return true;
+  }
+
+  game->sdl_rectum.w = surface->w;
+  game->sdl_rectum.h = surface->h;
+}
