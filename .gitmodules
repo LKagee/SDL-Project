@@ -1,0 +1,3 @@
+[submodule "lib/Beginners-Guide-to-SDL2-in-C"]
+	path = lib/Beginners-Guide-to-SDL2-in-C
+	url = https://github.com/ProgrammingRainbow/Beginners-Guide-to-SDL2-in-C.git
