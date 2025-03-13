@@ -1,9 +1,11 @@
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include <time.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_image.h>
 #define WINDOW_NAME "Window"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -12,8 +14,8 @@ struct Game {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
   TTF_Font *ttf_font;
-  SDL_Color *text_color;
-  SDL_Rect *sdl_rectum;
+  SDL_Color text_color;
+  SDL_Rect sdl_rectum;
   SDL_Texture *text_image;
 };
 
@@ -26,7 +28,6 @@ int main()
 	struct Game game = {
 		.window = NULL,
 		.renderer = NULL,
-    .surface = NULL,
     .ttf_font = NULL,
     .text_color = {255, 255, 255, 255},
     .sdl_rectum = {0, 0, 0, 0},
@@ -37,6 +38,12 @@ int main()
 		sdl_cleanup(&game, EXIT_FAILURE);
 		return 1;
 	}
+
+  if(sdl_loadmedia(&game)) {
+    sdl_cleanup(&game, EXIT_FAILURE);
+    return 1;
+  }
+
   SDL_SetWindowBrightness(game.window, 1.0);
 
 	while(true) {
@@ -61,8 +68,9 @@ int main()
             }
             }
 }
-  
+   
 	SDL_RenderClear(game.renderer);
+  SDL_RenderCopy(game.renderer, game.text_image, NULL, &game.sdl_rectum);
 	SDL_RenderPresent(game.renderer);
 	SDL_Delay(16);
     }
@@ -75,8 +83,11 @@ int main()
 
 
 void sdl_cleanup(struct Game *game, int exit_status) {
+  SDL_DestroyTexture(game->text_image);
+  TTF_CloseFont(game->ttf_font);
 	SDL_DestroyWindow(game->window);
 	SDL_DestroyRenderer(game->renderer);
+  TTF_Quit();
 	SDL_Quit();
 	exit(exit_status);
 }
@@ -91,8 +102,8 @@ game->window = SDL_CreateWindow(WINDOW_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWP
 	if(!game->window) {
 		fprintf(stderr, "Error creating window: %s\n", SDL_GetError() );
 	return true;
-}
-
+}   
+ 
 game->renderer = SDL_CreateRenderer(game->window, -1, 0);
 	if(!game->renderer) {
 		fprintf(stderr, "Error creating renderer: %s", SDL_GetError() );
@@ -114,7 +125,7 @@ return false;
 }
 
 bool sdl_loadmedia(struct Game *game) {
-  game->ttf_font = TTF_OpenFont(tbd, TEXT_SIZE);
+  game->ttf_font = TTF_OpenFont("fonts/freesansbold.ttf", TEXT_SIZE);
     if(!game->ttf_font) {
       fprintf(stderr, "Error creating font: %s", TTF_GetError() );
       return true;
@@ -129,4 +140,12 @@ bool sdl_loadmedia(struct Game *game) {
 
   game->sdl_rectum.w = surface->w;
   game->sdl_rectum.h = surface->h;
+  game->text_image = SDL_CreateTextureFromSurface(game->renderer, surface);
+  SDL_FreeSurface(surface);
+    if(!game->text_image) {
+      fprintf(stderr, "Error creating Texture: %s\n", SDL_GetError() );
+      return true;
+  }
+
+  return false;
 }
