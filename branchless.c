@@ -1,9 +1,12 @@
 //NOTES TO SELF: 
-//-Create ball to ball collision detection AND response
-//-Create ball to rectangle collision, add bounce back response
+//-Create ball to ball collision response
+//-Create ball to rectangle collision response
 //-Add sound effects and music
 //-Maybe add damage notifier through sprite flash
+//-Cleanup up this shitty code
+//-Play with threads like how I play with myself
 
+#include <math.h>
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +21,9 @@
 #define IMAGE_FLAGS IMG_INIT_PNG
 #define TEXT_SIZE 80
 bool button_press = false;
+int radii = 26;
+int diameter = 52;
+int distance;
 struct Menu {
   SDL_Rect menu_dist;
   SDL_Rect menu_button[2];
@@ -164,8 +170,12 @@ int main()
             }
         }
 
-  if(checkCollision(&game)) {
+  if(checkCollision2(&game)) {
     SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255);
+    }
+
+  if(checkCollision(&game)) {
+      SDL_SetRenderDrawColor(game.renderer, 0, 0, 255, 255);
     }
 
   update_enemy2(&game);
@@ -303,92 +313,77 @@ bool sdl_loadmedia(struct Game *game, struct Menu *menu) {
 }
 
 //revise this into ball to ball collision detection using radii of circles
-bool checkCollision3(struct Game *game) {
-  int leftA, leftB;
-  int rightA, rightB;
-  int topA, topB;
-  int bottomA, bottomB;
-
-  leftA = game->enemy_rect.x;
-  rightA = game->enemy_rect.x + game->enemy_rect.w;
-  topA = game->enemy_rect.y;
-  bottomA = game->enemy_rect.x + game->enemy_rect.h;
-
-  if(bottomA <= topB) {
-    return false;
+bool checkCollision2(struct Game *game) {
+  int ballAX = game->enemy_rect.x;
+  int ballBX = game->enemy2_rect.x;
+  int ballAY = game->enemy_rect.y;
+  int ballBY = game->enemy2_rect.y;
+  int XDist = ballBX - ballAX;
+  int YDist = ballBY - ballAY;
+  distance = sqrt((XDist * XDist) + (YDist * YDist));
+  if(distance <= diameter) {
+    return true;
   }
 
-  if(topA >= bottomB) {
-    return false;
-  }
-
-  if(rightA <= leftB) {
-    return false;
-  }
-
-  if(leftA >= rightB) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 //revise to be only for ball to rectangle collision detection
 bool checkCollision(struct Game *game) {
+  //I dont want to have to keep typing "game->enemy_rect" everytime I want their x, y, w, or h values.
+  int cxRED = game->enemy_rect.x;
+  int cyRED = game->enemy_rect.y;
+  int cxBLUE = game->enemy2_rect.x;
+  int cyBLUE = game->enemy2_rect.y;
+  int rx = game->sprite_rect.x;
+  int ry = game->sprite_rect.y;
+  int rh = game->sprite_rect.h;
+  int rw = game->sprite_rect.w;
+  int testxRED = cxRED;
+  int testyRED = cyRED;
+  int testxBLUE = cxBLUE;
+  int testyBLUE = cyBLUE;
 
-  int leftA, leftB, leftC;
-  int rightA, rightB, rightC;
-  int topA, topB, topC;
-  int bottomA, bottomB, bottomC;
-
-  leftA = game->sprite_rect.x;
-  rightA = game->sprite_rect.x + game->sprite_rect.w;
-  topA = game->sprite_rect.y;
-  bottomA = game->sprite_rect.y + game->sprite_rect.h;
-
-  leftB = game->enemy_rect.x;
-  rightB = game->enemy_rect.x + game->enemy_rect.w;
-  topB = game->enemy_rect.y;
-  bottomB = game->enemy_rect.y + game->enemy_rect.h;
-
-  leftC = game->enemy2_rect.x;
-  rightC = game->enemy2_rect.x + game->enemy2_rect.w;
-  topC = game->enemy2_rect.y;
-  bottomC = game->enemy2_rect.y + game->enemy2_rect.h;
-
-  if(bottomA <= topB) {
-    return false;
+  if(cxRED < rx) {
+    testxRED = rx;
+  } else if(cxRED > rx + rh) {
+    testxRED = rx + rh;
   }
 
-  if(topA >= bottomB) {
-    return false;
+  if(cyRED < ry) {
+    testyRED = ry;
+  } else if(cyRED > ry + rw) {
+    testyRED = ry + rw;
   }
 
-  if(rightA <= leftB) {
-    return false;
+  if(cxBLUE < rx) {
+    testxBLUE = rx;
+  } else if(cxBLUE > rx + rh) {
+    testxBLUE = rx + rh;
   }
 
-  if(leftA >= rightB) {
-    return false;
+  if(cyBLUE < ry) {
+    testyBLUE = ry;
+  } else if(cyBLUE > ry + rw) {
+    testyBLUE = ry + rw;
   }
 
-  if(bottomA <= topC) {
-    return false;
+  float distXRED = cxRED - testxRED;
+  float distYRED = cyRED - testyRED;
+  float distXBLUE = cxBLUE - testxBLUE;
+  float distYBLUE = cyBLUE - testyBLUE;
+  float distance1 = sqrt( (distXRED * distXRED) + (distYRED * distYRED) );
+  float distance2 = sqrt( (distXBLUE * distXBLUE) + (distYBLUE * distYBLUE) );
+
+  if(distance1 <= radii) {
+    return true;
   }
 
-  if(topA >= bottomC) {
-    return false;
+  if(distance2 <= radii) {
+    return true;
   }
 
-  if(rightA <= leftC) {
-    return false;
-  }
-
-  if(leftA >= rightC) {
-    return false;
-  }
-
-  return true;
+  return false;
 }
 
 void update_enemy2(struct Game *game) {
