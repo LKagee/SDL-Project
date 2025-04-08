@@ -15,6 +15,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_thread.h>
 #define WINDOW_NAME "Window"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -54,6 +55,7 @@ bool sdl_loadmedia(struct Game *game, struct Menu *menu);
 void sdl_cleanup(struct Game *game, struct Menu *menu, int exit_status);
 bool button_highlight(struct Menu *menu, SDL_Event event);
 bool menu_nav(struct Menu *menu, SDL_Event event, int a);
+int collisionResponse(void* ptr, struct Game *game);
 void update_enemy1(struct Game *game);
 void update_enemy2(struct Game *game);
 void update_sprite(struct Game *game);
@@ -171,10 +173,12 @@ int main()
         }
 
   if(checkCollision2(&game)) {
-    SDL_SetRenderDrawColor(game.renderer, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(game.renderer, 0, 0, 0, 255);
     }
 
-  if(checkCollision(&game)) {
+  /*SDL_Thread *th = SDL_CreateThread(collisionResponse(struct Game *game), NULL);*/
+  
+ if(checkCollision(&game)) {
       SDL_SetRenderDrawColor(game.renderer, 0, 0, 255, 255);
     }
 
@@ -314,14 +318,25 @@ bool sdl_loadmedia(struct Game *game, struct Menu *menu) {
 
 //revise this into ball to ball collision detection using radii of circles
 bool checkCollision2(struct Game *game) {
+  int ballAXVOL = game->text_xvol;
+  int ballAYVOL = game->text_yvol;
+  int ballBXVOL = game->enemy2_xvol;
+  int ballBYVOL = game->enemy2_yvol;
   int ballAX = game->enemy_rect.x;
   int ballBX = game->enemy2_rect.x;
   int ballAY = game->enemy_rect.y;
   int ballBY = game->enemy2_rect.y;
   int XDist = ballBX - ballAX;
   int YDist = ballBY - ballAY;
+  int newVOLX1 = (ballAXVOL + ballBXVOL) /2;
+  int newVOLY1 = (ballAYVOL + ballAYVOL) /2;
   distance = sqrt((XDist * XDist) + (YDist * YDist));
   if(distance <= diameter) {
+    game->enemy_rect.x = ballAX + newVOLX1;
+    game->enemy_rect.y = ballAY + newVOLY1;
+
+    game->text_xvol = newVOLX1;
+    game->text_yvol = newVOLY1;
     return true;
   }
 
@@ -331,6 +346,10 @@ bool checkCollision2(struct Game *game) {
 //revise to be only for ball to rectangle collision detection
 bool checkCollision(struct Game *game) {
   //I dont want to have to keep typing "game->enemy_rect" everytime I want their x, y, w, or h values.
+  int cxREDVOL = game->text_xvol;
+  int cyREDVOL = game->text_yvol;
+  int cxBLUEVOL = game->enemy2_xvol;
+  int cyBLUEVOL = game->enemy2_yvol;
   int cxRED = game->enemy_rect.x;
   int cyRED = game->enemy_rect.y;
   int cxBLUE = game->enemy2_rect.x;
@@ -374,8 +393,15 @@ bool checkCollision(struct Game *game) {
   float distYBLUE = cyBLUE - testyBLUE;
   float distance1 = sqrt( (distXRED * distXRED) + (distYRED * distYRED) );
   float distance2 = sqrt( (distXBLUE * distXBLUE) + (distYBLUE * distYBLUE) );
+  int newVolX1 = (cxREDVOL + cxBLUEVOL) /2;
+  int newVolY1 = (cyREDVOL + cyREDVOL) /2;
 
   if(distance1 <= radii) {
+    game->enemy_rect.x = cxRED + newVolX1;
+    game->enemy_rect.y = cyRED + newVolY1;
+
+    game->text_xvol = newVolX1;
+    game->text_yvol = newVolY1;
     return true;
   }
 
@@ -489,3 +515,12 @@ bool button_highlight(struct Menu *menu, SDL_Event event) {
   }
   return false;
 }
+
+/*int collisionResponse(void* ptr, struct Game *game) {
+  int newVolX1 = (game->enemy_xvol + game->enemy2_xvol) / 2;
+
+  if(checkCollision(struct Game *game)) {
+    
+  }
+}*/
+
